@@ -1,4 +1,5 @@
 import copy
+import math
 import argparse
 import numpy as np
 
@@ -6,9 +7,9 @@ def sign(x):
     if x >= 0: return 1
     else: return -1
 
-def sin(x):
-    sinx = np.sin(x)
-    if sinx >= 0.5: return 1
+def cos(x):
+    out = np.cos(x)
+    if out >= 0.8: return 1
     else: return -1
 
 class SingleLayerPerceptron():
@@ -20,14 +21,17 @@ class SingleLayerPerceptron():
         self.input_dim = input_dim
         self.output_dim = output_dim
 
-        self.W = np.zeros(shape=(output_dim, input_dim))
-        self.b = np.random.rand(output_dim) 
-        self.b_init = copy.deepcopy(self.b)
-
         if activation_type == 'sign':
+            self.W = np.zeros(shape=(output_dim, input_dim))
+            self.b = np.random.rand(output_dim) 
+
             self.activation_func = sign
-        elif activation_type == 'sin':
-            self.activation_func = sin
+        elif activation_type == 'cos':
+            self.W = np.array([1, 0]) @ np.array([[1/math.sqrt(2), -1/math.sqrt(2)], [1/math.sqrt(2), 1/math.sqrt(2)]])
+            self.b = np.array([0.0]) 
+            
+            self.activation_func = cos
+        self.b_init = copy.deepcopy(self.b)
 
         self.epoch = epoch
         self.learning_rate = learning_rate
@@ -50,14 +54,13 @@ class SingleLayerPerceptron():
         pred = np.matmul(self.W, data)
         pred = pred - self.b
         pred = self.activation_func(pred)
-
-        if pred >= 0.5: return 1
-        else: return -1
+        
+        return pred
 
 def run_and(args):
     """
       |  
-      0  1
+      0  1 
       |  
     --0--0---
     """
