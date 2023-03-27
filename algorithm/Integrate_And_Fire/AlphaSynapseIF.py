@@ -2,7 +2,6 @@ import time
 import numpy as np
 from numpy import concatenate as cc
 
-np.random.seed(0)
 
 class AlphaSynapseIF:
   ''' 

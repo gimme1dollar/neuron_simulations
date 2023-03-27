@@ -2,16 +2,17 @@ import numpy as np
 
 class IntegrateAndFire:
   # Basic integrate-and-fire neuron {R Rao, 2007}
-  def __init__(self, c, r, v_0, v_th, v_sp):
-    self.capacitance = c
-    self.resistance = r
+  def __init__(self, args, **kwargs):
+    self.capacitance = kwargs['c']
+    self.resistance = kwargs['r']
 
-    self.membranePotential = v_0
-    self.thresholdVoltage = v_th
-    self.spikeVoltage = v_sp
-    self.resetVoltage = v_th * 0.2
+    self.membranePotential = kwargs['v_0']
+    self.thresholdVoltage = kwargs['v_th']
+    self.spikeVoltage = kwargs['v_sp']
+    self.resetVoltage = kwargs['v_th'] * 0.2
 
     self.fired = 0
+
   def update(self, i):
     if(not self.fired) :
       # dV/dt = - V/RC + I/C
@@ -25,3 +26,11 @@ class IntegrateAndFire:
     if(self.membranePotential > self.thresholdVoltage) :
         self.membranePotential = self.spikeVoltage
         self.fired = 5
+
+def main(args, **kwargs):
+    model = IntegrateAndFire(args, **kwargs)
+
+    epoch = args.epoch
+    for i in range(epoch):
+        model.update(i)
+        print(model.membranePotential)
