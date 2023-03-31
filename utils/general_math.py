@@ -20,3 +20,7 @@ def softmax(x):
     res = np.exp(x) 
     res = res / np.sum(res, axis=1, keepdims=True) # x \in [output_dim, class_num]
     return res
+
+def relu(x):
+    if x < 0: return 0
+    else: return x
