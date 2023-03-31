@@ -30,15 +30,13 @@ class MultiLayerPerceptron():
         L = -1. * L
 
         # backward
-        dLdy = None
-        dLda2 = None
-        dLdW2 = None
-        dLdb2 = None
+        dLda2 = pred - label # CE = log( sum_j (a2_j) ) - a2_l
+        dLdW2 = np.dot(np.transpose(dLda2), feat) / len(data) 
+        dLdb2 = np.sum(dLda2) / len(data)
 
-        dLdh = None
-        dLda1 = None
-        dLdW1 = None
-        dLdb1 = None
+        dLda1 = sigmoid_grad(feat) * np.dot(dLda2, self.W2)
+        dLdW1 = np.dot(dLda1, data) / len(data)
+        dLdb1 = np.sum(dLda1) / len(data)
 
         # optimize step
         self.W2 -= self.learning_rate * dLdW2
@@ -62,3 +60,4 @@ class MultiLayerPerceptron():
 
 def main(args):
     return
+
