@@ -13,9 +13,9 @@ class MultiLayerPerceptron():
         self.activation_func = sigmoid
         
         self.W1 = np.random.normal(0, 1, size=(self.hidden_dim, self.input_dim))
-        self.b1 = np.zeros(self.hidden_dim) 
+        self.b1 = np.zeros(shape=(self.hidden_dim, 1)) 
         self.W2 = np.random.normal(0, 1, size=(self.output_dim, self.hidden_dim))
-        self.b2 = np.zeros(self.output_dim)
+        self.b2 = np.zeros(shape=(self.output_dim, 1))
 
         self.epoch = args.epoch
         self.learning_rate = args.learning_rate
@@ -31,11 +31,11 @@ class MultiLayerPerceptron():
 
         # backward
         dLda2 = pred - label # CE = log( sum_j (a2_j) ) - a2_l
-        dLdW2 = np.dot(np.transpose(dLda2), feat) / len(data) 
+        dLdW2 = np.dot(dLda2, feat.transpose()) / len(data) 
         dLdb2 = np.sum(dLda2) / len(data)
 
-        dLda1 = sigmoid_grad(feat) * np.dot(dLda2, self.W2)
-        dLdW1 = np.dot(dLda1, data) / len(data)
+        dLda1 = sigmoid_grad(feat) * np.dot(self.W2.transpose(), dLda2)
+        dLdW1 = np.dot(dLda1, data.transpose()) / len(data)
         dLdb1 = np.sum(dLda1) / len(data)
 
         # optimize step
@@ -44,7 +44,7 @@ class MultiLayerPerceptron():
         self.W1 -= self.learning_rate * dLdW1
         self.b1 -= self.learning_rate * dLdb1
 
-        return
+        return L
 
     def eval(self, data):
         '''
@@ -58,6 +58,58 @@ class MultiLayerPerceptron():
 
         return y, h
 
-def main(args):
+def build_batches(train_data, train_labels, batch_size=512):
+    batches_num = len(train_data) // batch_size
+    if len(train_data) % batch_size != 0: batches_num += 1
+    
+    batches_data, batches_label = [], []
+    for i in range(batches_num):
+        start, end   = i*batch_size, (i+1)*batch_size
+        batch_data   = train_data  [start:end]
+        batch_labels = train_labels[start:end]
+
+        batches_data.append(batch_data)
+        batches_label.append(batch_labels)
+    return batches_data, batches_label
+
+def main(args, **kwargs):
+
+    # model
+    model = MultiLayerPerceptron(args, **kwargs)
+
+    # dataset
+    from data.MNIST import get_data
+    train_data, train_labels, \
+            test_data, test_labels = get_data()
+
+    # training
+    losses = []
+    for e in range(args.epoch):
+        batches_data, batches_label = build_batches(train_data, train_labels, args.batch_size)
+
+        loss = 0
+        for batch_data, batch_label in zip(batches_data, batches_label):
+            loss += model.train(batch_data.transpose(), batch_label.transpose())
+        
+        losses.append(loss)
+
+        if e % 10 == 0:
+            print('training ', e, ' :', loss)
+    print()
+        
+    # evaluation
+    batches_data, batches_label = build_batches(test_data, test_labels, args.batch_size)
+
+    loss = 0
+    for batch_data, batch_label in zip(batches_data, batches_label):
+        pred, _ = model.eval(batch_data.transpose())
+
+        L = np.sum(batch_label.transpose() * np.log(pred)) # cross-entropy loss
+        L = L / len(batch_data)
+        L = -1. * L
+
+        loss += L
+    print('evaluation :', loss)
+
     return
 

@@ -2,6 +2,8 @@ from utils.arguments import get_args
 
 def main(args):
     algorithm = args.algorithm
+
+    # Electrical Model
     if algorithm == 'IF':
         from algorithm.Integrate_And_Fire.IntegrateAndFire import main as experiment
         arguments = {
@@ -9,9 +11,16 @@ def main(args):
                 'r': 10,
                 'v_0': 10, 'v_th': 10, 'v_sp': 10,
             }
+    
+    # Mathematical Model
     if algorithm == 'SLP':
         from algorithm.Perceptron.Single_layer_perceptron import main as experiment
         arguments = {'test': None}
+
+    elif algorithm == 'MLP':
+        from algorithm.Perceptron.Multi_layer_perceptron import main as experiment
+        arguments = {'test': None}
+
 
     experiment(args, **arguments)
     return
